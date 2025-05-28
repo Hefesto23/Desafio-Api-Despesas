@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: expenses-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: expenses_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - expenses-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  expenses-network:
+    driver: bridge
