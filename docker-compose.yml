@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL - Banco principal (desenvolvimento)
   postgres:
     image: postgres:15-alpine
     container_name: expenses-postgres
@@ -10,14 +11,44 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
     ports:
-      - '5432:5432'
+      - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - expenses-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d expenses_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Banco de teste (opcional, só para E2E)
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: expenses-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: expenses_test_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - expenses-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d expenses_test_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - test # Só sobe quando explicitamente solicitado
 
 volumes:
   postgres_data:
+    driver: local
+  postgres_test_data:
     driver: local
 
 networks:

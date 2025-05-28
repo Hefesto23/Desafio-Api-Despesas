@@ -1,0 +1,68 @@
+### ============================================
+### 💡 COMO USAR:
+### 1. Instale a extensão "REST Client" no VS Code
+### 2. Abra este arquivo
+### 3. Clique em "Send Request" acima de cada ###
+### 4. Copie o access_token da resposta para usar nos próximos testes
+### ============================================
+
+### Variáveis
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### ============================================
+### 🔐 Health check
+### ============================================
+
+### 0. GET / - Endpoint raiz (Hello World)
+GET {{baseUrl}}/
+
+### 0.1 GET /health - Verificação de saúde da API
+GET {{baseUrl}}/health
+
+### ============================================
+### 🔐 AUTENTICAÇÃO
+### ============================================
+
+### 1. Login com credenciais corretas
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@expenses.com",
+  "password": "admin123"
+}
+
+### 2. Login com email inválido
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "wrong@email.com",
+  "password": "admin123"
+}
+
+### 3. Login com senha inválida
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@expenses.com",
+  "password": "senhaerrada"
+}
+
+### 4. Login com dados inválidos (validação)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "email-invalido",
+  "password": "123"
+}
+
+### 5. Login sem dados
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{}
+
