@@ -2,16 +2,19 @@
 ### 💡 COMO USAR:
 ### 1. Instale a extensão "REST Client" no VS Code
 ### 2. Abra este arquivo
-### 3. Clique em "Send Request" acima de cada ###
-### 4. Copie o access_token da resposta para usar nos próximos testes
+### 3. Execute PRIMEIRO o login (#1) para capturar o token automaticamente
+### 4. Os próximos requests usarão o token automaticamente
 ### ============================================
 
 ### Variáveis
 @baseUrl = http://localhost:3000
 @contentType = application/json
 
+@token = {{login.response.body.access_token}}
+// Variável global para o token de autenticação
+
 ### ============================================
-### 🔐 Health check
+### 🔐 HEALTH CHECK
 ### ============================================
 
 ### 0. GET / - Endpoint raiz (Hello World)
@@ -21,10 +24,11 @@ GET {{baseUrl}}/
 GET {{baseUrl}}/health
 
 ### ============================================
-### 🔐 AUTENTICAÇÃO
+### 🔐 AUTENTICAÇÃO (EXECUTE PRIMEIRO!)
 ### ============================================
 
 ### 1. Login com credenciais corretas
+# @name login
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
@@ -66,3 +70,151 @@ Content-Type: {{contentType}}
 
 {}
 
+### ============================================
+### 💰 DESPESAS - ENDPOINTS PÚBLICOS (sem token)
+### ============================================
+
+### 6. GET /despesas - Listar todas as despesas
+GET {{baseUrl}}/despesas
+
+### 7. GET /despesas - Filtrar por mês e ano
+GET {{baseUrl}}/despesas?mes=01
+
+### 8. GET /despesas - Filtrar por categoria
+GET {{baseUrl}}/despesas?categoria=LAZER
+
+### 9. GET /despesas - Filtros combinados
+GET {{baseUrl}}/despesas?mes=05&ano=2024&categoria=LAZER
+### Exemplo de filtro combinado
+GET {{baseUrl}}/despesas?mes=01&ano=2021
+### 10. GET /despesas/estatisticas - Estatísticas gerais
+GET {{baseUrl}}/despesas/estatisticas
+
+### 11. GET /despesas/estatisticas - Estatísticas filtradas
+GET {{baseUrl}}/despesas/estatisticas?mes=05&ano=2025
+
+### 12. GET /despesas/:id - Buscar despesa por ID (use um ID do seed)
+GET {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440001
+
+### 13. GET /despesas/:id - Buscar com ID inválido (teste de erro)
+GET {{baseUrl}}/despesas/id-invalido
+
+### 14. GET /despesas/:id - Buscar ID inexistente
+GET {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-999999999999
+
+### ============================================
+### 💰 DESPESAS - ENDPOINTS PROTEGIDOS (USA TOKEN AUTOMATICAMENTE)
+### ============================================
+
+### 15. POST /despesas - Criar nova despesa (USA TOKEN AUTOMÁTICO)
+POST {{baseUrl}}/despesas
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Caneta Azul",
+  "amount": 5.90,
+  "category": "OUTROS",
+  "date": "2025-05-28"
+}
+
+### 16. POST /despesas - Criar despesa com dados inválidos
+POST {{baseUrl}}/despesas
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "",
+  "amount": -10.50,
+  "category": "CATEGORIA_INEXISTENTE",
+  "date": "data-invalida"
+}
+
+### 17. POST /despesas - Criar despesa sem token (deve dar erro 401)
+POST {{baseUrl}}/despesas
+Content-Type: {{contentType}}
+
+{
+  "title": "Teste sem token",
+  "amount": 25.00,
+  "category": "OUTROS",
+  "date": "2025-05-28"
+}
+
+### 18. PATCH /despesas/:id - Atualizar despesa (USA TOKEN AUTOMÁTICO)
+PATCH {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440002
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Encher o tanque Gasolina ",
+  "amount": 180.00
+}
+
+### 19. PATCH /despesas/:id - Atualizar apenas a categoria
+PATCH {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440002
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "category": "OUTROS"
+}
+
+### 20. PATCH /despesas/:id - Atualizar despesa inexistente
+PATCH {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-999999999999
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Despesa que não existe"
+}
+
+### 21. PATCH /despesas/:id - Atualizar sem token (deve dar erro 401)
+PATCH {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440001
+Content-Type: {{contentType}}
+
+{
+  "title": "Tentativa sem token"
+}
+
+### 22. DELETE /despesas/:id - Excluir despesa (USA TOKEN AUTOMÁTICO)
+DELETE {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440005
+Authorization: Bearer {{token}}
+
+### 23. DELETE /despesas/:id - Excluir despesa inexistente
+DELETE {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-999999999999
+Authorization: Bearer {{token}}
+
+### 24. DELETE /despesas/:id - Excluir sem token (deve dar erro 401)
+DELETE {{baseUrl}}/despesas/550e8400-e29b-41d4-a716-446655440004
+
+### ============================================
+### 🧪 TESTES DE VALIDAÇÃO
+### ============================================
+
+### 25. POST /despesas - Teste com valor muito alto
+POST {{baseUrl}}/despesas
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Compra cara",
+  "amount": 99999999.99,
+  "category": "OUTROS",
+  "date": "2025-05-28"
+}
+
+### 26. GET /despesas - Teste com filtros inválidos
+GET {{baseUrl}}/despesas?mes=13&ano=abcd&categoria=INEXISTENTE
+
+### 27. POST /despesas - Teste com todos os campos válidos
+POST {{baseUrl}}/despesas
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Academia - Mensalidade",
+  "amount": 89.90,
+  "category": "SAUDE",
+  "date": "2025-05-01"
+}

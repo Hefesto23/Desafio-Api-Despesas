@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppService } from './app.service';
+import { DespesasModule } from './despesas/despesas.module';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { AppService } from './app.service';
     // Módulos da aplicação
     PrismaModule,
     AuthModule,
-    // TODO: Adicionar ExpensesModule depois
+    DespesasModule,
   ],
   controllers: [AppController],
   providers: [
